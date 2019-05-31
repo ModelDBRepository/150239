@@ -1,0 +1,51 @@
+/* Minimal example in pure hoc
+ * 24/01/2013
+ * (c) 2013, C.Schmidt-Hieber, University College London
+ */
+
+load_file("stdrun.hoc")
+system("pwd")
+if (name_declared("autolaunch")) { chdir("..") } // added for auto-launch
+xopen("./nrn/cells/stellate-garden.hoc")
+
+/* general settings */
+dt = 0.05 /* integration interval (ms) */
+steps_per_ms = 1.0/dt /* NEURON quirk */
+tstop = 1000.0 /* sweep duration (ms) */
+istep = 0.05 /* current step (nA) */
+
+
+/* load cell */
+objref cell
+cell = new stellate_garden()
+strdef cellname
+sprint(cellname, "%s", cell)
+
+forall {nseg=1} /* low spatial accuracy */
+
+objref ic
+cell.somaloc.secRef.sec {
+    ic = new IClamp(cell.somaloc.loc)
+    ic.del = 200.0
+    ic.dur = 500.0
+}
+
+objref mrec
+mrec = new Vector()
+mrec.record(&cell.somaloc.secRef.sec.v(0.5))
+run0=-1
+run1=9
+newPlot(0, tstop, -65, 10)
+graphItem.save_name("graphList[0].")
+graphList[0].append(graphItem)
+strdef soma_v_str
+sprint(soma_v_str, "%s.soma.v(0.5)", cellname)
+graphItem.addexpr(soma_v_str)
+
+for nrun=run0,run1 {
+    printf("%.2f percent completed\r", (nrun-run0)/(run1-run0+1)*100.0)
+    ic.amp = nrun*istep
+    v_init = cell.Vrest
+    run()
+}
+printf("\n")

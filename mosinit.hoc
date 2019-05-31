@@ -1,0 +1,8 @@
+//moddir nrn/mod
+// previous line instructs NEURON to compile the mod
+// files in nrn/mod on auto-launch
+
+// detect this variable to cd up a folder in test_run.hoc
+{autolaunch=1}
+load_file("nrngui.hoc")
+load_file("demo/test_rin.hoc")
